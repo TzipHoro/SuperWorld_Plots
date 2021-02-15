@@ -1,11 +1,13 @@
 cd SuperWorld_Plots
 
-timestamp() {
-  date +"at %H:%M:%S on %d/%m/%Y"
+function Get-TimeStamp {
+    
+    return "[{0:MM/dd/yy} {0:HH:mm:ss}]" -f (Get-Date)
+    
 }
 
 git add .
-git commit -am "Regular auto-commit $(timestamp)"
+git commit -am "Regular auto-commit $(Get-TimeStamp)"
 git push
 
 pause
