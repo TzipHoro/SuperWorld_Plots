@@ -1,0 +1,148 @@
+---
+title: "SuperWorld Plot Sales"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: menu
+    source_code: embed
+    theme: yeti
+---
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+library(leaflet)
+library(leaflet.extras)
+library(sf)
+library(tidyverse)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(plotly)
+library(usmap)
+
+plots_sold = read_csv("C:/Users/rebec/SuperWorld_Plot_Recommendation/data/plots_sold.csv")[-1]
+plots_sold$code = toupper(plots_sold$code)
+
+us_address = plots_sold[which(plots_sold$code == "US"),]$address
+
+state = c()
+for (i in 1:length(us_address)){
+  add = tail(unlist(str_split(us_address[i], pattern = ", ")), 2)[1]
+  add = gsub(' [[:digit:]]+', '', add)
+  state = c(state, add)
+}
+
+state_data = data.frame(state) %>%
+  group_by(state) %>%
+  summarise(sold = n())
+
+```
+
+*Total Plot Sales:*
+
+```{r}
+nrow(plots_sold)
+```
+
+<br>
+
+*Top 10 Countries:*
+
+```{r}
+plots_sold %>% 
+  group_by(country) %>% 
+  summarise(`plots sold` = n()) %>% 
+  arrange(-`plots sold`) %>% 
+  head(10) %>% 
+  knitr::kable()
+```
+
+<br>
+
+*Top 10 US States:*
+
+```{r}
+state_data %>% 
+  summarise(state, `plots sold` = sold) %>% 
+  arrange(-`plots sold`) %>% 
+  head(10) %>% 
+  knitr::kable()
+```
+
+
+
+
+
+
+Row {data-height=600}
+-------------------------------------
+    
+### Plots Sold Across the World
+
+```{r fig.width=11, warning=FALSE, message=FALSE}
+world = ne_countries(scale = "medium", returnclass = "sf")
+df = st_sf(merge(plots_sold, world, by.x = "code", by.y = "iso_a2", all.x = FALSE, all.y = TRUE, returnclass = "sf"))
+
+df_plot = df %>%
+    group_by(country, code) %>%
+    summarise(sold = n()) %>%
+    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    ggplot() +
+    geom_sf(aes(fill = sold))+
+    scale_fill_gradient(trans = "log") +
+    geom_sf_text(aes(label = code), size = 2) +
+    theme(axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.title = element_text("Plots Sold")) +
+    labs(caption = "Sold values are in log scale") +
+    guides(fill = guide_colourbar(barwidth = 0.5, barheight = 10))
+
+# df2 = df %>%
+#     group_by(country, code) %>%
+#     summarise(sold = n()) %>%
+#     mutate(sold = ifelse(is.na(country), 0, sold))
+
+# plot(df2["sold"], logz = TRUE, main = NULL, key.pos = 4)
+
+ggplotly(df_plot) %>% 
+  layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
+                            showarrow = F, xref='paper', yref='paper', 
+                            xanchor='right', yanchor='auto', xshift=0, yshift=-7,
+                            font=list(size=15))
+         )
+```
+
+
+   
+Row 
+-------------------------------------
+   
+### Plot Locations
+
+```{r}
+leaflet(plots_sold) %>% 
+  addTiles() %>% 
+  addCircles(lng = ~lon, lat = ~lat) %>% 
+  setView(lat = 37.0902, lng = -95.7129, zoom = 4)
+```   
+ 
+### Plots Sold in the US
+
+```{r}
+us = plot_usmap(data = state_data, values = "sold", regions = "states") +
+  theme(legend.position = "right") +
+  scale_fill_continuous(name = "Plots Sold")
+  
+ggplotly(us)
+
+```
+    
+
+
+
+
+
+
+
+
