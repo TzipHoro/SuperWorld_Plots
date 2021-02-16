@@ -1,12 +1,10 @@
 ---
 title: "SuperWorld Plot Sales"
-
 output: 
   flexdashboard::flex_dashboard:
     social: menu
     source_code: embed
     theme: yeti
-
 ---
 
 Cumulative Plot Sales
@@ -292,7 +290,7 @@ plot = df_year %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            xanchor='right', yanchor='auto', xshift=0, yshift=1,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
