@@ -1,12 +1,16 @@
 ---
 title: "SuperWorld Plot Sales"
+
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
     social: menu
     source_code: embed
     theme: yeti
+
 ---
+
+Cumulative Plot Sales
+=====================================
 
 Inputs {.sidebar}
 -------------------------------------
@@ -20,11 +24,13 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(plotly)
 library(usmap)
+library(lubridate)
 
 plots_sold = read_csv("C:/Users/rebec/SuperWorld_Plot_Recommendation/data/plots_sold.csv")[-1]
 plots_sold$code = toupper(plots_sold$code)
 
-us_address = plots_sold[which(plots_sold$code == "US"),]$address
+us_plots = plots_sold[which(plots_sold$code == "US"),]
+us_address = us_plots$address
 
 state = c()
 for (i in 1:length(us_address)){
@@ -32,6 +38,8 @@ for (i in 1:length(us_address)){
   add = gsub(' [[:digit:]]+', '', add)
   state = c(state, add)
 }
+
+us_plots = cbind(us_plots, state) 
 
 state_data = data.frame(state) %>%
   group_by(state) %>%
@@ -75,12 +83,12 @@ state_data %>%
 
 
 
-Row {data-height=600}
+Column {data-width=800}
 -------------------------------------
     
 ### Plots Sold Across the World
 
-```{r fig.width=11, warning=FALSE, message=FALSE}
+```{r warning=FALSE, message=FALSE}
 world = ne_countries(scale = "medium", returnclass = "sf")
 df = st_sf(merge(plots_sold, world, by.x = "code", by.y = "iso_a2", all.x = FALSE, all.y = TRUE, returnclass = "sf"))
 
@@ -105,12 +113,15 @@ df_plot = df %>%
 
 # plot(df2["sold"], logz = TRUE, main = NULL, key.pos = 4)
 
-ggplotly(df_plot) %>% 
+p = ggplotly(df_plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=0, yshift=-7,
-                            font=list(size=15))
+                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            font=list(size=15)),
+         xaxis = list(autorange = TRUE),
+         yaxis = list(autorange = TRUE)
          )
+p
 ```
 
 
@@ -134,12 +145,255 @@ us = plot_usmap(data = state_data, values = "sold", regions = "states") +
   theme(legend.position = "right") +
   scale_fill_continuous(name = "Plots Sold")
   
-ggplotly(us)
-
+p_us = ggplotly(us)
+p_us
 ```
     
 
 
+
+World Plots
+=====================================
+
+Column {data-width=200}
+-------------------------------------
+
+### Cumulative Plot Sales 
+
+```{r}
+plots_sold %>% 
+  group_by(country) %>% 
+  summarize(sold = n()) %>% 
+  arrange(-sold) %>% 
+  knitr::kable()
+```
+
+Column {.tabset}
+-------------------------------------
+
+### Day
+
+```{r}
+plots_today = plots_sold %>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 1)
+df_today = st_sf(merge(plots_today, world, by.x = "code", by.y = "iso_a2", all.x = FALSE, all.y = TRUE, returnclass = "sf"))
+
+plot = df_today %>%
+    group_by(country, code) %>%
+    summarise(sold = n()) %>%
+    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    ggplot() +
+    geom_sf(aes(fill = sold))+
+    scale_fill_gradient(trans = "log") +
+    geom_sf_text(aes(label = code), size = 2) +
+    theme(axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.title = element_text("Plots Sold")) +
+    labs(caption = "Sold values are in log scale") +
+    guides(fill = guide_colourbar(barwidth = 0.5, barheight = 10))
+
+ggplotly(plot) %>% 
+  layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
+                            showarrow = F, xref='paper', yref='paper', 
+                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            font=list(size=15)),
+         xaxis = list(autorange = TRUE),
+         yaxis = list(autorange = TRUE)
+         )
+```
+
+### Week
+
+```{r}
+plots_week = plots_sold %>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 7)
+df_week = st_sf(merge(plots_week, world, by.x = "code", by.y = "iso_a2", all.x = FALSE, all.y = TRUE, returnclass = "sf"))
+
+plot = df_week %>%
+    group_by(country, code) %>%
+    summarise(sold = n()) %>%
+    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    ggplot() +
+    geom_sf(aes(fill = sold))+
+    scale_fill_gradient(trans = "log") +
+    geom_sf_text(aes(label = code), size = 2) +
+    theme(axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.title = element_text("Plots Sold")) +
+    labs(caption = "Sold values are in log scale") +
+    guides(fill = guide_colourbar(barwidth = 0.5, barheight = 10))
+
+ggplotly(plot) %>% 
+  layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
+                            showarrow = F, xref='paper', yref='paper', 
+                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            font=list(size=15)),
+         xaxis = list(autorange = TRUE),
+         yaxis = list(autorange = TRUE)
+         )
+```
+
+### Month
+
+```{r}
+plots_month = plots_sold %>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 30)
+df_month = st_sf(merge(plots_month, world, by.x = "code", by.y = "iso_a2", all.x = FALSE, all.y = TRUE, returnclass = "sf"))
+
+plot = df_month %>%
+    group_by(country, code) %>%
+    summarise(sold = n()) %>%
+    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    ggplot() +
+    geom_sf(aes(fill = sold))+
+    scale_fill_gradient(trans = "log") +
+    geom_sf_text(aes(label = code), size = 2) +
+    theme(axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.title = element_text("Plots Sold")) +
+    labs(caption = "Sold values are in log scale") +
+    guides(fill = guide_colourbar(barwidth = 0.5, barheight = 10))
+
+ggplotly(plot) %>% 
+  layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
+                            showarrow = F, xref='paper', yref='paper', 
+                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            font=list(size=15)),
+         xaxis = list(autorange = TRUE),
+         yaxis = list(autorange = TRUE)
+         )
+```
+
+### Year
+
+```{r}
+plots_year = plots_sold %>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 365)
+df_year = st_sf(merge(plots_year, world, by.x = "code", by.y = "iso_a2", all.x = FALSE, all.y = TRUE, returnclass = "sf"))
+
+plot = df_year %>%
+    group_by(country, code) %>%
+    summarise(sold = n()) %>%
+    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    ggplot() +
+    geom_sf(aes(fill = sold))+
+    scale_fill_gradient(trans = "log") +
+    geom_sf_text(aes(label = code), size = 2) +
+    theme(axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.title = element_text("Plots Sold")) +
+    labs(caption = "Sold values are in log scale") +
+    guides(fill = guide_colourbar(barwidth = 0.5, barheight = 10))
+
+ggplotly(plot) %>% 
+  layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
+                            showarrow = F, xref='paper', yref='paper', 
+                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            font=list(size=15)),
+         xaxis = list(autorange = TRUE),
+         yaxis = list(autorange = TRUE)
+         )
+```
+
+### Total
+
+```{r}
+p
+```
+
+US Plots 
+=====================================
+
+Column {data-width=200}
+-------------------------------------
+
+### Cumulative US Plot Sales 
+
+```{r}
+us_plots %>% 
+  group_by(state) %>% 
+  summarize(sold = n()) %>% 
+  arrange(-sold) %>% 
+  knitr::kable()
+```
+
+
+Column {.tabset}
+-------------------------------------
+
+### Day
+
+```{r}
+
+
+us_today = us_plots%>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 1) %>% 
+  group_by(state) %>% 
+  summarise(sold = n())
+us_today = plot_usmap(data = us_today, values = "sold", regions = "states") +
+  theme(legend.position = "right") +
+  scale_fill_continuous(name = "Plots Sold")
+  
+ggplotly(us_today)
+
+
+```
+
+### Week
+
+```{r}
+us_week = us_plots%>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 7) %>% 
+  group_by(state) %>% 
+  summarise(sold = n())
+us_week = plot_usmap(data = us_week, values = "sold", regions = "states") +
+  theme(legend.position = "right") +
+  scale_fill_continuous(name = "Plots Sold")
+  
+ggplotly(us_week)
+```
+
+### Month
+
+```{r}
+us_month = us_plots%>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 30) %>% 
+  group_by(state) %>% 
+  summarise(sold = n())
+us_month = plot_usmap(data = us_month, values = "sold", regions = "states") +
+  theme(legend.position = "right") +
+  scale_fill_continuous(name = "Plots Sold")
+  
+ggplotly(us_month)
+```
+
+### Year
+
+```{r}
+us_year = us_plots%>% 
+  mutate(days = interval(date, today()) %/% days(1)) %>%
+  filter(days < 365) %>% 
+  group_by(state) %>% 
+  summarise(sold = n())
+us_year = plot_usmap(data = us_year, values = "sold", regions = "states") +
+  theme(legend.position = "right") +
+  scale_fill_continuous(name = "Plots Sold")
+  
+ggplotly(us_year)
+```
+
+### Total
+
+```{r}
+p_us
+```
 
 
 
