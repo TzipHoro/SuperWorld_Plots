@@ -97,7 +97,7 @@ df_plot = df %>%
     ggplot() +
     geom_sf(aes(fill = sold))+
     scale_fill_gradient(trans = "log") +
-    geom_sf_text(aes(label = code), size = 2) +
+    geom_sf_text(aes(label = code), size = 1) +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
           legend.title = element_text("Plots Sold")) +
@@ -111,15 +111,14 @@ df_plot = df %>%
 
 # plot(df2["sold"], logz = TRUE, main = NULL, key.pos = 4)
 
-p = ggplotly(df_plot) %>% 
+ggplotly(df_plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
          )
-p
 ```
 
 
@@ -143,8 +142,8 @@ us = plot_usmap(data = state_data, values = "sold", regions = "states") +
   theme(legend.position = "right") +
   scale_fill_continuous(name = "Plots Sold")
   
-p_us = ggplotly(us)
-p_us
+ggplotly(us)
+
 ```
     
 
@@ -183,8 +182,8 @@ plot = df_today %>%
     mutate(sold = ifelse(is.na(country), 0, sold)) %>%
     ggplot() +
     geom_sf(aes(fill = sold))+
-    scale_fill_gradient(trans = "log") +
-    geom_sf_text(aes(label = code), size = 2) +
+    scale_fill_gradientn(colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100)) +
+    geom_sf_text(aes(label = code), size = 1) +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
           legend.title = element_text("Plots Sold")) +
@@ -192,13 +191,8 @@ plot = df_today %>%
     guides(fill = guide_colourbar(barwidth = 0.5, barheight = 10))
 
 ggplotly(plot) %>% 
-  layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
-                            showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
-                            font=list(size=15)),
-         xaxis = list(autorange = TRUE),
-         yaxis = list(autorange = TRUE)
-         )
+  layout(xaxis = list(autorange = TRUE),
+         yaxis = list(autorange = TRUE))
 ```
 
 ### Week
@@ -212,11 +206,11 @@ df_week = st_sf(merge(plots_week, world, by.x = "code", by.y = "iso_a2", all.x =
 plot = df_week %>%
     group_by(country, code) %>%
     summarise(sold = n()) %>%
-    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    mutate(sold = ifelse(is.na(country), -Inf, sold)) %>%
     ggplot() +
     geom_sf(aes(fill = sold))+
-    scale_fill_gradient(trans = "log") +
-    geom_sf_text(aes(label = code), size = 2) +
+    scale_fill_gradientn(trans = "log", colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100)) +
+    geom_sf_text(aes(label = code), size = 1) +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
           legend.title = element_text("Plots Sold")) +
@@ -226,7 +220,7 @@ plot = df_week %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
@@ -244,11 +238,11 @@ df_month = st_sf(merge(plots_month, world, by.x = "code", by.y = "iso_a2", all.x
 plot = df_month %>%
     group_by(country, code) %>%
     summarise(sold = n()) %>%
-    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    mutate(sold = ifelse(is.na(country), -Inf, sold)) %>%
     ggplot() +
     geom_sf(aes(fill = sold))+
-    scale_fill_gradient(trans = "log") +
-    geom_sf_text(aes(label = code), size = 2) +
+    scale_fill_gradientn(trans = "log", colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100)) +
+    geom_sf_text(aes(label = code), size = 1) +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
           legend.title = element_text("Plots Sold")) +
@@ -258,7 +252,7 @@ plot = df_month %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=0, yshift=-1,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
@@ -276,11 +270,11 @@ df_year = st_sf(merge(plots_year, world, by.x = "code", by.y = "iso_a2", all.x =
 plot = df_year %>%
     group_by(country, code) %>%
     summarise(sold = n()) %>%
-    mutate(sold = ifelse(is.na(country), 0, sold)) %>%
+    mutate(sold = ifelse(is.na(country), -Inf, sold)) %>%
     ggplot() +
     geom_sf(aes(fill = sold))+
-    scale_fill_gradient(trans = "log") +
-    geom_sf_text(aes(label = code), size = 2) +
+    scale_fill_gradientn(trans = "log", colors = colorspace::heat_hcl(5, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100)) +
+    geom_sf_text(aes(label = code), size = 1) +
     theme(axis.title.x=element_blank(),
           axis.title.y=element_blank(),
           legend.title = element_text("Plots Sold")) +
@@ -290,7 +284,7 @@ plot = df_year %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=0, yshift=1,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
@@ -300,7 +294,29 @@ ggplotly(plot) %>%
 ### Total
 
 ```{r}
-p
+plot = df %>%
+    group_by(country, code) %>%
+    summarise(sold = n()) %>%
+    mutate(sold = ifelse(is.na(country), -Inf, sold)) %>%
+    ggplot() +
+    geom_sf(aes(fill = sold))+
+    scale_fill_gradientn(trans = "log", colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100)) +
+    geom_sf_text(aes(label = code), size = 1) +
+    theme(axis.title.x=element_blank(),
+          axis.title.y=element_blank(),
+          legend.title = element_text("Plots Sold")) +
+    labs(caption = "Sold values are in log scale") +
+    guides(fill = guide_colourbar(barwidth = 0.5, barheight = 10))
+
+
+ggplotly(plot) %>% 
+  layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
+                            showarrow = F, xref='paper', yref='paper', 
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
+                            font=list(size=15)),
+         xaxis = list(autorange = TRUE),
+         yaxis = list(autorange = TRUE)
+         )
 ```
 
 US Plots 
@@ -328,14 +344,16 @@ Column {.tabset}
 ```{r}
 
 
-us_today = us_plots%>% 
+us_today = us_plots %>% 
   mutate(days = interval(date, today()) %/% days(1)) %>%
   filter(days < 1) %>% 
   group_by(state) %>% 
   summarise(sold = n())
 us_today = plot_usmap(data = us_today, values = "sold", regions = "states") +
   theme(legend.position = "right") +
-  scale_fill_continuous(name = "Plots Sold")
+  # scale_fill_continuous(name = "Plots Sold") +
+  scale_fill_gradientn(name = "Plots Sold", 
+                       colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100))
   
 ggplotly(us_today)
 
@@ -352,7 +370,8 @@ us_week = us_plots%>%
   summarise(sold = n())
 us_week = plot_usmap(data = us_week, values = "sold", regions = "states") +
   theme(legend.position = "right") +
-  scale_fill_continuous(name = "Plots Sold")
+  scale_fill_gradientn(name = "Plots Sold", 
+                       colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100))
   
 ggplotly(us_week)
 ```
@@ -367,7 +386,8 @@ us_month = us_plots%>%
   summarise(sold = n())
 us_month = plot_usmap(data = us_month, values = "sold", regions = "states") +
   theme(legend.position = "right") +
-  scale_fill_continuous(name = "Plots Sold")
+  scale_fill_gradientn(name = "Plots Sold", 
+                       colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100))
   
 ggplotly(us_month)
 ```
@@ -382,7 +402,8 @@ us_year = us_plots%>%
   summarise(sold = n())
 us_year = plot_usmap(data = us_year, values = "sold", regions = "states") +
   theme(legend.position = "right") +
-  scale_fill_continuous(name = "Plots Sold")
+  scale_fill_gradientn(name = "Plots Sold", 
+                       colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100))
   
 ggplotly(us_year)
 ```
@@ -390,7 +411,12 @@ ggplotly(us_year)
 ### Total
 
 ```{r}
-p_us
+us = plot_usmap(data = state_data, values = "sold", regions = "states") +
+  theme(legend.position = "right") +
+  scale_fill_gradientn(name = "Plots Sold", 
+                       colors = colorspace::heat_hcl(12, h = c(-60, -150), l = c(75, 40), c = c(40, 80), power = 100))
+  
+ggplotly(us)
 ```
 
 
