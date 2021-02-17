@@ -114,7 +114,7 @@ df_plot = df %>%
 ggplotly(df_plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=80,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
@@ -220,7 +220,7 @@ plot = df_week %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=80,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
@@ -252,7 +252,7 @@ plot = df_month %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=80,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
@@ -284,7 +284,7 @@ plot = df_year %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=80,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
@@ -312,7 +312,7 @@ plot = df %>%
 ggplotly(plot) %>% 
   layout(annotations = list(x = 1, y = -0.1, text = "Sold values are in log scale", 
                             showarrow = F, xref='paper', yref='paper', 
-                            xanchor='right', yanchor='auto', xshift=-10, yshift=90,
+                            xanchor='right', yanchor='auto', xshift=-10, yshift=80,
                             font=list(size=15)),
          xaxis = list(autorange = TRUE),
          yaxis = list(autorange = TRUE)
