@@ -363,7 +363,7 @@ ggplotly(us_today)
 ### Week
 
 ```{r}
-us_week = us_plots%>% 
+us_week = us_plots %>% 
   mutate(days = interval(date, today()) %/% days(1)) %>%
   filter(days < 7) %>% 
   group_by(state) %>% 
