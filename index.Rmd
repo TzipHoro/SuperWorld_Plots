@@ -24,7 +24,7 @@ library(plotly)
 library(usmap)
 library(lubridate)
 
-plots_sold = read_csv("C:/Users/rebec/SuperWorld_Plot_Recommendation/data/plots_sold.csv")[-1]
+plots_sold = read_csv("C:/Users/Tziporah/SuperWorld_Plot_Recommendation/data/plots_sold.csv")[-1]
 plots_sold$code = toupper(plots_sold$code)
 
 us_plots = plots_sold[which(plots_sold$code == "US"),]
