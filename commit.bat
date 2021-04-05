@@ -7,5 +7,3 @@ cd C:\\Users\\rebec\\SuperWorld_Plots
 git add .
 git commit -m "plot auto-commit"
 git push
-
-pause
