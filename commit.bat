@@ -8,4 +8,3 @@ git add .
 git commit -m "plot auto-commit"
 git push
 
-pause
